@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<p>Version distribution</p>
+<div id="results"></div>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<script>
+function fetchResults() {
+    const requests = [...Array(30).keys()]
+        .map(() => axios.get('/version'));
+
+    axios
+        .all(requests)
+        .then(function (responses) {
+            const versions = responses.map(r => r.data);
+            const uniqueVersions = [...new Set(versions)];
+
+            const stats = uniqueVersions
+                .sort()
+                .map(uv => ({
+                    version: uv,
+                    count: versions
+                        .filter(v => v === uv)
+                        .length
+                }));
+
+            document.getElementById("results").textContent =
+                stats
+                    .map(s => `${s.version}:${s.count}`)
+                    .join(",");
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+}
+
+setInterval(fetchResults, 1000);
+</script>
