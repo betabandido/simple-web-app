@@ -4,14 +4,18 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 )
 
 const version = "v1"
 
 func main() {
-	http.Handle("/",
-		http.StripPrefix("/", http.FileServer(http.Dir("static"))),
-	)
+	koDataPath := os.Getenv("KO_DATA_PATH")
+	if koDataPath == "" {
+		log.Fatal("KO_DATA_PATH variable is not set")
+	}
+
+	http.Handle("/", http.FileServer(http.Dir(koDataPath)))
 
 	http.HandleFunc("/version", versionHandler)
 
