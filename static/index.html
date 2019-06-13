@@ -7,12 +7,12 @@
 <script>
 function fetchResults() {
     const requests = [...Array(30).keys()]
-        .map(() => axios.get('/version'));
+        .map(() => axios.get('/version').catch(useNull));
 
     axios
         .all(requests)
         .then(function (responses) {
-            const versions = responses.map(r => r.data);
+            const versions = responses.map(r => r == null ? "error" : r.data);
             const uniqueVersions = [...new Set(versions)];
 
             const stats = uniqueVersions
@@ -24,14 +24,22 @@ function fetchResults() {
                         .length
                 }));
 
-            document.getElementById("results").textContent =
-                stats
-                    .map(s => `${s.version}:${s.count}`)
-                    .join(",");
+            renderResults(stats
+                .map(s => `${s.version}:${s.count}`)
+                .join(",")
+            );
         })
         .catch(function (error) {
-            console.log(error);
+            renderResults(`unexpected error: ${error}`);
         });
+}
+
+function renderResults(text) {
+    document.getElementById("results").textContent = text
+}
+
+function useNull() {
+    return null;
 }
 
 setInterval(fetchResults, 1000);

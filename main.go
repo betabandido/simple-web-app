@@ -7,6 +7,7 @@ import (
 )
 
 const version = "v1"
+const injectFailures = false
 
 func main() {
 	http.Handle("/",
@@ -19,8 +20,12 @@ func main() {
 }
 
 func versionHandler(w http.ResponseWriter, _ *http.Request) {
-	_, err := fmt.Fprintf(w, version)
-	if err != nil {
-		log.Printf("error returning version: %v", err)
+	if injectFailures {
+		http.Error(w, "an error", http.StatusInternalServerError)
+	} else {
+		_, err := fmt.Fprintf(w, version)
+		if err != nil {
+			log.Printf("error returning version: %v", err)
+		}
 	}
 }

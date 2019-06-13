@@ -3,6 +3,9 @@ kind: Config
 build:
   artifacts:
   - image: gcr.io/product-catalog-237219/simple-web-app
+  tagPolicy:
+    envTemplate:
+      template: "{{.IMAGE_NAME}}:{{.VERSION}}"
 deploy:
   kubectl:
     manifests:

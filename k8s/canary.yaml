@@ -1,0 +1,54 @@
+apiVersion: flagger.app/v1alpha3
+kind: Canary
+metadata:
+  name: simple-web-app
+  namespace: default
+spec:
+  # deployment reference
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: simple-web-app
+  # the maximum time in seconds for the canary deployment
+  # to make progress before it is rollback (default 600s)
+  progressDeadlineSeconds: 60
+  service:
+    # container port
+    port: 8000
+    # Istio gateways (optional)
+    gateways:
+    - http-gateway
+    # Istio virtual service host names (optional)
+    hosts:
+    - '*'
+    # HTTP match conditions (optional)
+    match:
+      - uri:
+          prefix: /
+  # promote the canary without analysing it (default false)
+  skipAnalysis: false
+  # define the canary analysis timing and KPIs
+  canaryAnalysis:
+    # schedule interval (default 60s)
+    interval: 10s
+    # max number of failed metric checks before rollback
+    threshold: 3
+    # max traffic percentage routed to canary
+    # percentage (0-100)
+    maxWeight: 50
+    # canary increment step
+    # percentage (0-100)
+    stepWeight: 10
+    # Istio Prometheus checks
+    metrics:
+    # builtin checks
+    - name: request-success-rate
+      # minimum req success rate (non 5xx responses)
+      # percentage (0-100)
+      threshold: 99
+      interval: 1m
+    - name: request-duration
+      # maximum req duration P99
+      # milliseconds
+      threshold: 500
+      interval: 30s
